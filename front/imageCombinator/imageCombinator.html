@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Combiner</title>
+    <link rel="stylesheet" href="imageCombinator.css">
+
+</head>
+<body>
+    <h1>Image Combiner</h1>
+    <input type="file" id="fileInput" multiple accept="image/*">
+    <br>
+    <textarea id="urlInput" placeholder="Paste image URLs (one per line)"></textarea>
+    <br>
+    <div id="dropZone">Drag and drop images here</div>
+    <button id="combineButton">Combine Images</button>
+    <canvas id="preview"></canvas>
+
+    <script src="imageCombinator.js"></script>
+</body>
+</html>

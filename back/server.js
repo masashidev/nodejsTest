@@ -19,7 +19,6 @@ console.log(global.newVariable); // undefined
 
 // eventEmitter.emit("valueUpdated");
 
-
 // const { readFile, readFileSync, read } = require("fs");
 // const data = readFileSync("./sample.txt", "utf8");
 
@@ -49,7 +48,7 @@ const path = require("path");
 
 const app = express();
 
-const frontPath = path.join(__dirname, "..", "front");
+const frontPath = path.join(__dirname, "..", "front/imageCombinator");
 
 app.use(express.static(frontPath));
 
@@ -66,13 +65,16 @@ app.use(express.static(frontPath));
 
 app.get("/", async (req, res) => {
   try {
-    const data = await readFile(path.join(frontPath, "main.html"), "utf8");
+    const data = await readFile(
+      path.join(frontPath, "imageCombinator.html"),
+      "utf8"
+    );
     res.send(data);
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Some error occurred");
   }
-})
+});
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("Server is running on http://localhost:3000");
