@@ -1,0 +1,32 @@
+:root {
+  --light-background: #f5f5f5;
+  --light-text: #333;
+  --light-primary: #007bff;
+  --light-secondary: #6c757d;
+
+  --dark-background: #333;
+  --dark-text: #f5f5f5;
+  --dark-primary: #007bff;
+  --dark-secondary: #6c757d;
+
+  --background: var(--light-background);
+  --text: var(--light-text);
+  --primary: var(--light-primary);
+  --secondary: var(--light-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--dark-background);
+    --text: var(--dark-text);
+    --primary: var(--dark-primary);
+    --secondary: var(--dark-secondary);
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+}
+
+
