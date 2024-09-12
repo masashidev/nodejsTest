@@ -5,67 +5,96 @@ const combineButton = document.getElementById("combineButton");
 const canvas = document.getElementById("preview");
 const ctx = canvas.getContext("2d");
 
-// simulate image upload
+
+function getPixelsFromImage(canvas) {
+  const imagePixelData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  return imagePixelData.data;
+}
+
+function toGrayScale(pixels) {
+  const grayScalePixels = [];
+  for (let i = 0; i < pixels.length; i += 4) {
+    const avg = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+    grayScalePixels.push(avg);
+    grayScalePixels.push(avg);
+    grayScalePixels.push(avg);
+    grayScalePixels.push(pixels[i + 3]);
+  }
+  return grayScalePixels;
+}
+
+function generateStripeImage(images) {
+  const minWidth = Math.min(...images.map((img) => img.width));
+  const minHeight = Math.min(...images.map((img) => img.height));
+
+  canvas.width = minWidth;
+  canvas.height = minHeight;
+
+  const imagePartitionCount = images.length;
+  const bandWidth = Math.floor(minWidth / imagePartitionCount);
+
+  let xOffset = 0;
+  images.forEach((img, index) => {
+    // Source rectangle ( where to start clipping )
+    // const totalImages = images.length;
+    // const lastIndex = totalImages - 1;
+    // const imageWidth = img.width;
+    // const availableWidth = imageWidth - bandWidth;
+    // const relativePosition = index / lastIndex;
+    // const sx = Math.floor(availableWidth * relativePosition);
+    // if index is 0, sx = 0
+    // if index is lastIndex, sx = availableWidth
+    // so sx is a linear function of index
+    // think of this from right to left
+    const sx = Math.floor(
+      (img.width - bandWidth) * (index / (images.length - 1))
+    );
+    const sy = 0;
+    const sWidth = bandWidth;
+    const sHeight = minHeight;
+
+    // Destination rectangle ( where to place the image on the canvas )
+    const dx = xOffset;
+    const dy = 0;
+    const dWidth = bandWidth;
+    const dHeight = minHeight;
+
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+    xOffset += bandWidth;
+  });
+  // const pixels = getPixelsFromImage(canvas);
+  // const grayScalePixels = toGrayScale(pixels);
+  // ctx.putImageData(new ImageData(new Uint8ClampedArray(grayScalePixels), canvas.width, canvas.height), 0, 0);
+}
 
 
-function combineImages(files) {
-  // console.log(files);
-  const reader = new FileReader();
-  reader.readAsDataURL(files[0]);
-
-  reader.onload = (e) => {
-    // console.log(reader.result);
-    const img = new Image();
-    img.src = reader.result;
-    img.onload = () => {
-      preview.width = img.width;
-      preview.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, img.width, img.height);
-      console.log(imageData);
-      console.log(img.src);
-      const data = imageData.data;
-      console.log(data);
-
-      // invert colors
-      // for (let i = 0; i < data.length; i += 4) {
-      //   data[i] = 255 - data[i];
-      //   data[i + 1] = 255 - data[i + 1];
-      //   data[i + 2] = 255 - data[i + 2];
-      // }
-
-      // grayscale
-      for (let i = 0; i < data.length; i += 4) {
-        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-        data[i] = avg;
-        data[i + 1] = avg;
-        data[i + 2] = avg;
-      }
-
-      ctx.putImageData(imageData, 0, 0);
-
-      // canvas.toBlob((blob) => {
-      //   const form = new FormData();
-      //   form.append("image", blob, "generatedImage.png");
-
-      //   fetch("http://localhost:3000/upload", {
-      //     method: "POST",
-      //     body: form,
-      //   })
-      //     .then((res) => res.json())
-      //     .then((data) => {
-      //       console.log(data);
-      //     });
-
-      // });
-
-
-    };
-  };
+function processImages(files) {
+  const images = [];
+  for (let file of files) {
+    if (file.type.startsWith("image/")) {
+      // create a new FileReader object
+      const reader = new FileReader();
+      reader.onload = (e) => { // e: ProgressEvent<FileReader>
+        //HTMLImageElement
+        const img = new Image();
+        img.onload = () => images.push(img);
+        // fill the src attribute of the image with the data URL
+        // target is the FileReader object, result is the data URL
+        img.src = e.target.result
+      };
+      // read the file as a data URL
+      reader.readAsDataURL(file);
+      console.log(file);
+    }
+  }
+  console.log(images);
+  setTimeout(() => {
+    generateStripeImage(images); // images: HTMLImageElement[]
+  }, 1000);
 };
 
 fileInput.addEventListener("change", () => {
-  combineImages(fileInput.files);
+  processImages(fileInput.files);
 });
 
 document.addEventListener("dragover", (e) => {
@@ -76,5 +105,5 @@ document.addEventListener("dragover", (e) => {
 document.addEventListener("drop", (e) => {
   e.preventDefault();
   e.stopPropagation();
-  combineImages(e.dataTransfer.files);
+  processImages(e.dataTransfer.files);
 });
