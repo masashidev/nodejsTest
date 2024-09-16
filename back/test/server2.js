@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import path from 'path';
 import url from 'url';
-import fs from 'fs/promises';
+import fs from 'fs/promises'; // async version of fs
 
 const PORT = process.env.PORT || 3000;
 const __filename = url.fileURLToPath(import.meta.url);
@@ -19,7 +19,7 @@ const jsonMiddleware = (req, res, next) => {
 }
 
 
-
+// async callback
 const server = createServer(async (req, res) => {
     if (req.url === "/api/sentences" && req.method === "GET") {
     res.setHeader("Content-Type", "application/json");
@@ -27,6 +27,7 @@ const server = createServer(async (req, res) => {
     const data = await fs.readFile(jsonFilePath);
     res.write(data);
     res.end();
+
 
     } else if (req.url.match(
       // /api/sentences/English
